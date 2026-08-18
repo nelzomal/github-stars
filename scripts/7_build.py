@@ -17,6 +17,7 @@ from collections import defaultdict, Counter
 
 ref = json.load(open(D + "reference.json"))
 survival = json.load(open(D + "survival.json"))
+accounts = json.load(open(D + "accounts.json"))
 blackout = json.load(open(D + "blackout.json"))
 trending_hist = json.load(open(D + "trending_hist.json"))
 trending_now = json.load(open(D + "trending_now.json"))
@@ -228,6 +229,7 @@ out = {
         "cat": categorise(m["repo"], m["domain"]),
         "alive": alive_of.get(m["repo"]),
     } for m in trending_hist["matched"]],
+    "accounts": accounts,
     "blackout": blackout,
     "now": trending_now,
 }

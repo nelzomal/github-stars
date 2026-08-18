@@ -158,7 +158,7 @@ HTML = r"""<!doctype html>
   GitHub 热榜上的仓库」，被渗透的比例月度峰值只有 <b>__PEAK_TRENDING_SHORT__</b> ——
   热榜的排序算法把绝大部分刷出来的热度挡在了外面。
   这两个数来自 ICSE'26 论文的公开复现包，本页用标准库重算了一遍；
-  而<b>存活状态、热榜分母、以及下面第 5 节那两条已经关掉的核查通道</b>，
+  而<b>存活状态、热榜分母、以及下面第 6 节那两条已经关掉的核查通道</b>，
   是 <b>__TODAY__</b> 现场测的。
 </p>
 
@@ -166,7 +166,7 @@ HTML = r"""<!doctype html>
 <p class="caption">
   横向的比例（<b>刷星仓库里有多少上过热榜</b>）是论文报的 0.42%，我独立复算是
   __P_CAMPAIGN__。但真正该问的是纵向的比例 —— <b>热榜仓库里有多少在刷星</b> ——
-  论文没给，见第 4 节：月度峰值 <b>__PEAK_TRENDING__</b>。
+  论文没给，见第 5 节：月度峰值 <b>__PEAK_TRENDING__</b>。
 </p>
 
 <h2><span class="no">01</span>这些星星买在了什么项目上</h2>
@@ -211,7 +211,55 @@ HTML = r"""<!doctype html>
   而它们恰好就是恶意软件集中的地方。
 </p>
 
-<h2><span class="no">02</span>买来的星长什么样</h2>
+<h2><span class="no">02</span>GitHub 清掉的到底是谁</h2>
+<p class="note">
+  上面那条「今天已经消失了」是这套检测<b>唯一的外部验证</b> ——
+  GitHub 不知道这份名单存在，是它自己按自己的规则删的。
+  但仓库被删可以是因为它装的东西，不一定是因为星。所以我把同一个问题往下问了一层，问到<b>账号</b>：
+  取 __ACC_DAY__ 三个整点的 GH Archive，把那几小时里的每一个星标账号按
+  「点没点过被标记的仓库」分成两组，再逐个查今天还在不在。
+</p>
+
+<table>
+  <thead><tr><th>组</th><th class="num">数量</th><th class="num">今天已消失</th></tr></thead>
+  <tbody>__ACC_TABLE__</tbody>
+</table>
+<p class="caption">
+  账号这一组是<b>故意做弱的</b>：那几小时里点过任一被标记仓库的人全算进来了，包含大量正常用户。
+  论文用后处理过的账号集在 2025-01 测得 <b>57.07%</b> 已删（基线 3.54%）—— 稀释只会让差距变小，
+  这是安全的方向。口径上，GraphQL 对<b>已删除、已封禁、已改名</b>一律返回 null，
+  三者从外部分不开；组织账号不能点星，所以 null 不会是组织。
+</p>
+
+<p class="note" style="margin-top:26px">
+  <b>但被清掉的不是「星得多」的账号，恰恰相反。</b>下面是两组<b>幸存者</b>各自星过多少个仓库：
+</p>
+__ACC_DIST__
+<p class="caption">
+  中位数：刷星组 <b>__ACC_T_MED__</b> 个，对照组 <b>__ACC_C_MED__</b> 个。
+  对照组里星得最多的那个账号星过 <b>__ACC_C_MAX__</b> 个仓库，活得好好的。
+  GitHub 的 <a href="https://docs.github.com/en/site-policy/acceptable-use-policies/github-acceptable-use-policies"
+  rel="noopener">Acceptable Use Policies</a> 确实禁止「rank abuse, such as automated starring or following」
+  和「secondary markets for the purpose of the proliferation of inauthentic activity」，
+  但<b>星标总数没有上限</b> —— 能卡住你的只有二级限流：每分钟 80 次、每小时 500 次内容生成请求，
+  且网页上的点击也计入。被清掉的是另一种账号：没有仓库、只点过一两颗星的空壳。
+</p>
+
+<p class="note" style="margin-top:26px">
+  <b>而仓库那一侧，删的理由几乎也不是星。</b>按类别拆开就看得很清楚：
+</p>
+<table>
+  <thead><tr><th>类别</th><th class="num">仓库数</th><th class="num">今天已消失</th></tr></thead>
+  <tbody>__CAT_TABLE__</tbody>
+</table>
+<p class="caption">
+  被删掉的是恶意软件、盗版分发、外挂加载器 —— 星标是它们的<b>广告手段</b>，
+  GitHub 下架的是载荷，星只是跟着一起没了。
+  <b>只买星、内容本身没问题的仓库基本不会被动</b>：__TRENDING_N__ 个上过热榜的被标记仓库里，
+  <b>__TR_ALIVE__ 个（__TR_ALIVE_PCT__）今天还在线</b>，而整体是 __GONE_PCT__ 已删。
+</p>
+
+<h2><span class="no">03</span>买来的星长什么样</h2>
 <p class="note">
   横轴是 <b>__WINDOW__</b> 的每一个月，每一行是一个仓库，格子的<b>亮度</b>是那个月的星数、
   <b>颜色</b>是那个月的真假配比。这里放的是 <b>__TRENDING_N__</b> 个上过 GitHub 热榜的刷星仓库
@@ -220,7 +268,7 @@ HTML = r"""<!doctype html>
 <div class="grid" id="grid"></div>
 <p class="caption" id="gridcap">悬停任意格子看那个月的数字。</p>
 
-<h2><span class="no">03</span>最大的那些刷星行动</h2>
+<h2><span class="no">04</span>最大的那些刷星行动</h2>
 <p class="note">按假星绝对数排序的前 600 个。点表头排序。</p>
 <div class="bar">
   <input type="search" id="tq" placeholder="筛选仓库名 / 类别…">
@@ -246,7 +294,7 @@ HTML = r"""<!doctype html>
   <tbody></tbody>
 </table></div>
 
-<h2><span class="no">04</span>热榜到底被渗透到什么程度</h2>
+<h2><span class="no">05</span>热榜到底被渗透到什么程度</h2>
 <p class="note">
   论文说：__CAMPAIGN__ 个刷星仓库里，有 __TRENDING_N_WINDOW__ 个上过热榜，占 0.42%。
   这个方向的比例说明<b>刷星的项目大多冲不上热榜</b>，但它回答不了读者真正关心的问题。
@@ -261,7 +309,7 @@ HTML = r"""<!doctype html>
   热榜归档只覆盖 __LANGS__ 六个语言榜，不含全语言首页，所以分母也是偏小的。
 </p>
 
-<h2><span class="no">05</span>为什么这个页面往后没法更新了</h2>
+<h2><span class="no">06</span>为什么这个页面往后没法更新了</h2>
 <p class="note">
   上面每一个数字，追到底都依赖两样东西：<b>谁给这个仓库点了星</b>，和<b>什么时候点的</b>。
   这两样东西过去有两条公开通道可以拿到。__TODAY__ 我把两条都测了一遍。
@@ -335,7 +383,7 @@ HTML = r"""<!doctype html>
   </p>
 </div>
 
-<h2><span class="no">06</span>那现在还能看什么</h2>
+<h2><span class="no">07</span>那现在还能看什么</h2>
 <p class="note">
   星标名单没了，但仓库的其它计数还在。__TODAY__ 我把 GitHub 热榜的<b>全语言首页
   + __NOW_LANGS__ 个语言榜</b> × 日/周/月三档全抓了一遍，去重 <b>__NOW_N__</b> 个仓库，
@@ -726,6 +774,50 @@ tl = LV["public_timeline"]
 gone_grp = next(g for g in d["flame"] if "删除" in g["n"])
 alive_grp = next(g for g in d["flame"] if "在线" in g["n"])
 
+AC = d["accounts"]
+acc_rows = "".join(
+    f'<tr><td>{label}</td><td class="num">{n(g["n"])}</td>'
+    f'<td class="num" style="color:var(--fake)">{g["gone_pct"]:.2%}</td></tr>'
+    for label, g in [
+        ("被判定刷星的仓库", SV["flagged"]), ("同月份对照组（仓库）", SV["control"]),
+        ("点过被标记仓库的账号", AC["treatment"]), ("同小时对照组（账号）", AC["control"]),
+    ])
+
+# One bar per group, seven buckets from "starred nothing" to "starred 10k+".
+# Red at the empty end, green at the busy end -- the two groups fill it from
+# opposite sides, which is the entire finding.
+BUCKET_COLOR = ["#cf3c33", "#d1553f", "#c07b3a", "#9c8f38", "#6d9440", "#3f9a41", "#2ea043"]
+
+
+def dist_bar(group, label):
+    # The label goes *inside* its own segment: a separate evenly-spaced tick row
+    # would sit under the wrong bucket, since the segments are proportional.
+    segs = "".join(
+        f'<i style="width:{share*100:.4f}%;background:{BUCKET_COLOR[i]};'
+        f'font-size:10px;line-height:15px;text-align:center;color:#0e1116;'
+        f'font-family:ui-monospace,Menlo,monospace;overflow:hidden" '
+        f'title="星过 {name} 个仓库：{share:.1%}">{name if share >= 0.07 else ""}</i>'
+        for i, (name, share) in enumerate(group["starred_buckets"]) if share > 0)
+    return (f'<div style="margin:12px 0 0"><div style="font-size:12.5px;color:var(--dim);'
+            f'margin-bottom:4px">{label}（{n(group["alive"])} 个幸存账号）</div>'
+            f'<div class="mixbar" style="height:15px">{segs}</div></div>')
+
+
+acc_dist = ('<div style="border:1px solid var(--line);border-radius:9px;'
+            'background:var(--panel);padding:13px 15px">'
+            + dist_bar(AC["treatment"], "点过被标记仓库的账号")
+            + dist_bar(AC["control"], "同小时对照组")
+            + '<div style="font-size:11.5px;color:#5b6572;margin-top:11px">'
+              '段是这个账号一共星过多少个仓库（左端一个都没星过，右端星过一万个以上），'
+              '段宽是该组账号里的占比</div></div>')
+
+cat_rows = "".join(
+    f'<tr><td>{c["cat"]}</td><td class="num">{n(c["repos"])}</td>'
+    f'<td class="num" style="color:var(--fake)">{c["gone"]/c["repos"]:.1%}</td></tr>'
+    for c in d["cat_totals"][:8])
+
+tr_alive = sum(1 for m in d["trending_matched"] if m["alive"] is True)
+
 funnel = "\n".join([
     f"<i>{n(T['fake_stars']):>9}</i>  颗星标被判定为假（{window[0]} → {window[1]}）",
     f"<b>{n(T['repos_flagged']):>9}</b>  个仓库身上带着这些假星",
@@ -736,7 +828,7 @@ funnel = "\n".join([
 ])
 
 foot = f"""
-<p><b>数据来源。</b>前半部分（第 1–4 节的历史数据）来自
+<p><b>数据来源。</b>前半部分（第 1、3–5 节的历史数据）来自
 <a href="https://github.com/hehao98/StarScout">hehao98/StarScout</a> 的公开复现包，
 即 He 等人 <i>Six Million (Suspected) Fake Stars on GitHub</i>（ICSE'26，
 <a href="https://doi.org/10.1145/3744916.3764531">10.1145/3744916.3764531</a>）的检测结果。
@@ -744,8 +836,8 @@ foot = f"""
 {n(T['repos_with_campaign'])} 个刷星仓库、{n(T['fake_stars'])} 颗假星、
 {T['ever_trending_in_window']} 个上过热榜、2024-07 峰值 16.66% 四个数，
 作为管线正确性的校验。</p>
-<p><b>我自己测的部分。</b>第 1 节的存活状态、第 4 节的热榜分母、第 5 节的两条通道、
-第 6 节的今日热榜信号，都是 {today} 现场跑的，脚本在 <code>scripts/</code> 里。
+<p><b>我自己测的部分。</b>第 1–2 节的存活状态、第 5 节的热榜分母、第 6 节的两条通道、
+第 7 节的今日热榜信号，都是 {today} 现场跑的，脚本在 <code>scripts/</code> 里。
 其中「刷星仓库今天消失了 {SV['flagged']['gone_pct']:.1%}，同月份对照组只消失了
 {SV['control']['gone_pct']:.1%}」是这套检测唯一的外部验证 ——
 GitHub 自己把它们删掉了。</p>
@@ -764,6 +856,16 @@ html = (HTML
         .replace("__DATA__", DATA)
         .replace("__FOOT__", json.dumps(foot, ensure_ascii=False))
         .replace("__CAMPAIGN__", n(T["repos_with_campaign"]))
+        .replace("__ACC_DAY__", AC["day"])
+        .replace("__ACC_TABLE__", acc_rows)
+        .replace("__ACC_DIST__", acc_dist)
+        .replace("__ACC_T_MED__", n(AC["treatment"]["starred_median"]))
+        .replace("__ACC_C_MED__", n(AC["control"]["starred_median"]))
+        .replace("__ACC_C_MAX__", n(AC["control"]["starred_max"]))
+        .replace("__CAT_TABLE__", cat_rows)
+        .replace("__TR_ALIVE_PCT__", f"{tr_alive/len(d['trending_matched']):.0%}")
+        .replace("__TR_ALIVE__", str(tr_alive))
+        .replace("__GONE_PCT__", f"{SV['flagged']['gone_pct']:.1%}")
         .replace("__TODAY__", today)
         .replace("__FUNNEL__", funnel)
         .replace("__P_CAMPAIGN__", f"{T['p_of_campaign_trending']:.2%}")

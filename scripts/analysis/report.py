@@ -10,6 +10,7 @@ from collections import Counter
 
 ref = json.load(open(D + "reference.json"))
 sv = json.load(open(D + "survival.json"))
+ac = json.load(open(D + "accounts.json"))
 bl = json.load(open(D + "blackout.json"))
 th = json.load(open(D + "trending_hist.json"))
 tn = json.load(open(D + "trending_now.json"))
@@ -50,6 +51,31 @@ for k, zh in (("flagged", "刷星仓库"), ("control", "同月份对照组")):
           f"   （在线 {s['alive']:,}，其中改过名 {s['renamed']}，归档 {s['archived']}）")
 print(f"  论文 2025-01 时测得    90.42%（对照 5.03%）")
 print(f"  测量时间              {sv['checked_at']}")
+
+h("账号存活（我今天测的）")
+print(f"  取样                  {ac['day']} 的 {', '.join(str(x) for x in ac['hours'])} 时，"
+      f"GH Archive 全部 WatchEvent")
+for k, zh in (("treatment", "点过被标记仓库"), ("control", "同小时对照组")):
+    g = ac[k]
+    print(f"  {zh:<14}{g['gone']:>7,}/{g['resolved']:,} 已消失 = {g['gone_pct']:.2%}")
+print(f"  论文 2025-01 时测得    {ac['paper']['campaign_gone']:.2%}"
+      f"（对照 {ac['paper']['baseline_gone']:.2%}）")
+print("  幸存者星过多少个仓库（占比）：")
+print("    " + " ".join(f"{b:>9}" for b, _ in ac["control"]["starred_buckets"]))
+for k, zh in (("treatment", "刷星组"), ("control", "对照组")):
+    g = ac[k]
+    print(f"    " + " ".join(f"{p:>8.1%}" for _, p in g["starred_buckets"])
+          + f"   {zh}（{g['alive']:,} 个幸存，中位 {g['starred_median']:,}，"
+            f"最多 {g['starred_max']:,}）")
+
+h("被删的是哪一类仓库")
+for c in site["cat_totals"][:8]:
+    print(f"  {c['cat']:<18}{c['repos']:>7,} 个   已消失 {c['gone']/c['repos']:>6.1%}"
+          f"   上过热榜 {c['trending']}")
+tm = site["trending_matched"]
+alive = sum(1 for m in tm if m["alive"] is True)
+print(f"  上过热榜的被标记仓库  {len(tm):>7,} 个   今天还在线 {alive} = {alive/len(tm):.0%}"
+      f"（整体已删 {sv['flagged']['gone_pct']:.1%}）")
 
 h("两条通道（我今天测的）")
 L = bl["live"]
