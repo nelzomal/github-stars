@@ -2,10 +2,11 @@
 
 Naming rule, applied here rather than in the template so it is checkable:
 a repository is named on the page only if GitHub has already removed it. The
-detector runs at ~99% precision over ~18.6k repos, so a few hundred entries are
-expected to be wrong, and a live project should not be labelled a star buyer by
-a page its maintainer cannot answer back on. Deleted repos carry no such risk,
-and they are where the malware is.
+detector's precision cannot be measured -- there is no way to verify whether a
+single star was bought -- so the paper reasons from a hypothetical 99%, which
+still leaves ~180 wrong entries out of 18.6k. A live project should not be
+labelled a star buyer by a page its maintainer cannot answer back on. Deleted
+repos carry no such risk, and they are where the malware is.
 """
 
 from pathlib import Path
