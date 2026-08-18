@@ -1,0 +1,4 @@
+# Probe + archive output. Regenerate with scripts/run.sh — the 2024 pass alone
+# streams ~49 GB of GH Archive, and the live probes are a snapshot of a moving
+# target, so a fresh run will legitimately differ from the one in index.html.
+data/
